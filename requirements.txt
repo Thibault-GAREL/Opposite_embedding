@@ -1,0 +1,7 @@
+torch>=2.0.0
+torchvision>=0.15.0
+ftfy>=6.1.1
+regex>=2022.1.18
+tqdm>=4.64.1
+git+https://github.com/openai/CLIP.git
+numpy>=1.24.0
