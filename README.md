@@ -1,8 +1,9 @@
 # CLIP Embedding Tools
 
-Two tools for exploring word embeddings using CLIP (Contrastive Language-Image Pre-training):
+Three tools for exploring word embeddings using CLIP (Contrastive Language-Image Pre-training):
 1. **Opposite Embedding Finder** - Find semantically opposite words
 2. **Embedding Arithmetic** - Perform vector operations (e.g., "man + kingdom ≈ king")
+3. **Embedding Arithmetic (Cached)** - Full 49K token vocabulary with disk caching
 
 ## Installation
 
@@ -32,7 +33,7 @@ finder.find_opposite("happy", top_k=10)
 
 ### Tool 2: Embedding Arithmetic
 
-Perform vector addition, subtraction, and complex operations.
+Perform vector addition, subtraction, and complex operations with a curated vocabulary (~500 words).
 
 **Interactive Mode:**
 ```bash
@@ -57,6 +58,41 @@ arithmetic.add_vectors("man", "kingdom")
 arithmetic.subtract_vectors("king", "man")
 
 # Complex operations
+arithmetic.complex_arithmetic("king - man + woman")
+```
+
+### Tool 3: Embedding Arithmetic (Cached - Recommended!)
+
+**Best option**: Full 49K token vocabulary with pre-computed embeddings cached to disk.
+
+**Features:**
+- ✅ Complete CLIP vocabulary (49,408 tokens)
+- ✅ High-quality embeddings (through full transformer)
+- ✅ First run: 2-3 minutes (one-time computation)
+- ✅ Subsequent runs: ~1 second (loads from cache)
+- ✅ Cache saved to `clip_token_embeddings.npz`
+
+**Interactive Mode:**
+```bash
+python embedding_arithmetic_cached.py
+```
+
+**Same commands as Tool 2:**
+- `add man kingdom`
+- `sub king man`
+- `calc king - man + woman`
+
+**As a Python Module:**
+```python
+from embedding_arithmetic_cached import EmbeddingArithmeticCached
+
+# First run: computes and caches embeddings (2-3 min)
+# Subsequent runs: loads from cache (~1 sec)
+arithmetic = EmbeddingArithmeticCached()
+
+# Same API as Tool 2
+arithmetic.add_vectors("man", "kingdom")
+arithmetic.subtract_vectors("king", "man")
 arithmetic.complex_arithmetic("king - man + woman")
 ```
 
@@ -142,7 +178,60 @@ Top 10 tokens closest to the result:
  ...
 ```
 
-**Note**: Token embeddings are extracted directly from the model (instant!). First operation extracts them, then all subsequent operations use cached embeddings.
+### Example 4: Cached Full Vocabulary (Recommended)
+
+**First run (one-time setup):**
+```
+$ python embedding_arithmetic_cached.py
+
+Loading CLIP model ViT-B/32 on cpu...
+CLIP vocabulary size: 49408 tokens
+
+Cache not found. Computing embeddings for 49408 tokens...
+This is a ONE-TIME operation that takes 2-3 minutes.
+Subsequent runs will load instantly from cache!
+
+Encoding tokens: 100%|████████████████| 772/772 [02:15<00:00,  5.71it/s]
+
+✓ Computed embeddings! Shape: (49408, 512)
+
+Saving embeddings to clip_token_embeddings.npz...
+✓ Saved! Future runs will load instantly from cache.
+```
+
+**All subsequent runs (instant):**
+```
+$ python embedding_arithmetic_cached.py
+
+Loading CLIP model ViT-B/32 on cpu...
+CLIP vocabulary size: 49408 tokens
+
+Loading pre-computed embeddings from clip_token_embeddings.npz...
+✓ Loaded 49408 cached embeddings!
+  Shape: (49408, 512)
+
+Enter command: add man kingdom
+
+============================================================
+Vector Addition: 'man' + 'kingdom' = ?
+============================================================
+
+Top 10 tokens closest to 'man' + 'kingdom':
+------------------------------------------------------------
+ 1. 'king'                     (similarity: 0.8567)
+ 2. 'prince'                   (similarity: 0.8234)
+ 3. 'monarch'                  (similarity: 0.8012)
+ 4. 'ruler'                    (similarity: 0.7890)
+ 5. 'emperor'                  (similarity: 0.7654)
+ ...
+```
+
+**Performance Comparison:**
+
+| Tool | Vocabulary | First Run | Subsequent | Quality |
+|------|-----------|-----------|------------|---------|
+| Tool 2 (limited) | 500 words | 10-20 sec | Instant | Good |
+| **Tool 3 (cached)** | **49K tokens** | **2-3 min** | **~1 sec** | **Excellent** |
 
 ## License
 

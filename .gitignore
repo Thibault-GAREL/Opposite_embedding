@@ -43,6 +43,9 @@ models/
 *.pth
 *.pt
 
+# CLIP embedding cache
+clip_token_embeddings.npz
+
 # OS
 .DS_Store
 Thumbs.db
