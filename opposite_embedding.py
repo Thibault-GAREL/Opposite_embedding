@@ -43,7 +43,7 @@ class OppositeEmbeddingFinder:
         """Load embeddings from cache or compute them if cache doesn't exist."""
         if os.path.exists(self.cache_file):
             print(f"\nLoading pre-computed embeddings from {self.cache_file}...")
-            data = np.load(self.cache_file)
+            data = np.load(self.cache_file, allow_pickle=True)
             self.token_embeddings = data['embeddings']
             cached_vocab = data['vocabulary'].tolist()
 
